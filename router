@@ -1,0 +1,131 @@
+
+  basic configuration
+ commands
+ 
+en
+config ter
+hostname R1 
+no ip domain-lookup 
+enable
+configure terminal 
+
+ipv6 unicast routing
+
+
+
+hostname CS-Department 
+
+no ip domain lookup
+ 
+enable secret NoOneShouldKnow 
+
+line console 0 
+password cisco 
+login 
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+transport input ssh
+exit
+
+
+banner motd "This is a secure network. Authorized Access only. Intruders will be prosecuted!"
+security passwords min-length 10 
+service password-encryption
+ 
+
+
+Use g0/0/1 to enter interface configuration mode.
+Configure the IPv4 address 10.1.2.1 and subnet mask 255.255.255.0.
+Configure the IPv6 address 2001:db8:acad:5::1/64.
+Describe the link as Link to LAN 4.
+Activate the interface.
+interface g0/0
+description Link to LAB 124-C LAN
+ip address 192.168.1.126 255.255.255.224 
+ipv6 address 2001:db8:acad:a::1/64 
+ipv6 address fe80::1 link-local 
+no shutdown 
+
+interface g0/1 
+description Link to lab 214-A LAN
+ip address 192.168.1.158 255.255.255.240
+ipv6 address 2001:db8:acad:b::1/64 
+ipv6 address fe80::1 link-local 
+no shutdown
+exit
+
+
+configure
+loopback interface
+
+interface loopback 0
+ip address 10.0.0.1 255.255.255.0
+exit
+
+show version 
+Configure SSH
+show ip ssh
+
+ip domain name Keleotech.com
+crypto key generate rsa general-keys modulus 1024
+exit
+
+
+Configure user authentication.
+username netadmin secret Cisco_CCNA7
+line vty 0 4
+transport input ssh
+login local
+exit
+
+Enable SSH version 2.
+S1(config)# ip ssh version 2
+
+verify
+
+show ip ssh
+
+show ssh
+
+
+
+
+
+
+
+
+
+
+subinterfaces on a router
+interface G0/0/1.10
+description Default Gateway for VLAN 10
+encapsulation dot1Q 10
+ip add 192.168.10.1 255.255.255.0
+exit
+R1(config)#
+interface G0/0/1.20
+description Default Gateway for VLAN 20
+encapsulation dot1Q 20
+ip add 192.168.20.1 255.255.255.0
+exit
+
+interface G0/0/1.99
+description Default Gateway for VLAN 99
+encapsulation dot1Q 99
+ip add 192.168.99.1 255.255.255.0
+exit
+
+
+interface G0/0/1
+description Trunk link to S1
+no shut
+end
+
+
+verify
+show ip interface brief
+show interfaces | include Gig|802.1Q
+show running-config interface g0/0/1.10

@@ -1,0 +1,6 @@
+configure terminal
+interface FastEthernet0/1
+duplex auto
+speed auto
+mdix auto
+end

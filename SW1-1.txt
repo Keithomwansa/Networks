@@ -1,0 +1,217 @@
+
+en
+config ter
+
+!hostname S1-1 
+no ip domain-lookup
+ 
+!enable secret class 
+
+!line console 0 
+!password cisco 
+!login 
+!logging synchronous
+!exit 
+
+!line vty 0 4 
+!password cisco 
+!transport input ssh
+!login 
+!exit
+
+
+!service password-encryption 
+
+banner motd "This is a secure system. Authorized Access only!"
+
+
+!ip domain name acad.pt
+!crypto key generate rsa general-keys modulus 1024
+
+
+!username admin secret C1sco123!
+!line vty 0 4
+!login local
+!transport input ssh
+!exit
+
+
+vlan 10
+name users
+exit
+
+vlan 999
+name unused
+exit
+
+interface vlan 10
+ip address dhcp
+no shutdown
+ip default-gateway 192.168.10.1
+
+
+
+interface range f0/1-5
+switchport mode access
+switchport access vlan 10
+no shut
+
+interface g0/1
+switchport mode access
+switchport access vlan 10
+switchport port-security
+switchport port-security maximum 4
+switchport port-security violation restrict
+switchport port-security aging time 10 
+!switchport port-security aging type inactivity
+switchport port-security mac-address sticky 
+no shut
+
+
+
+!Activate port security on the ports
+interface range f0/1-5
+switchport port-security
+!Configure the active ports to accept a maximum of 4 MAC addresses
+switchport port-security maximum 4
+
+!If a violation occurs, configure the 
+!ports to drop frames from the unauthorized MAC address, 
+!log it, and send an alert
+
+switchport port-security violation restrict
+
+!MAC addresses should be present in the MAC address table for
+! a maximum of 10 minutes before they are removed
+
+switchport port-security aging time 10 
+!switchport port-security aging type inactivity
+
+!Ports should add the learned MAC addresses to the running 
+!configuration.
+
+switchport port-security mac-address sticky 
+
+!Configure the MAC address of PC-A as a static address on port FastEthernet0/1.
+
+interface f0/1
+switchport port-security mac-address 00D0.D3DC.2825
+exit
+
+
+
+!Activate DHCP snooping globally.
+ip dhcp snooping
+!Activate DHCP snooping for the two VLANs that you configured.
+ip dhcp snooping vlan 10
+ip dhcp snooping vlan 999
+
+
+!Configure the ports to limit the rate to 5 DHCP packets per second.
+interface range f0/1 - 24
+ip dhcp snooping limit rate 5
+exit
+interface g0/1
+ip dhcp snooping limit rate 5
+exit
+
+!Configure the port that links to the router as trusted.
+!DHCP snooping is enabled because DAI requires the DHCP 
+!snooping binding table to operate. Next, DHCP snooping and 
+!ARP inspection are enabled for the PCs on VLAN10. 
+!The uplink port to the router is trusted, and therefore, 
+!is configured as trusted for DHCP snooping and ARP inspection.
+
+
+int g0/1
+!ip dhcp snooping vlan 10
+!ip arp inspection vlan 10
+ip dhcp snooping trust
+ip arp inspection trust
+
+
+!Guard against ARP attacks by implementing DAI.
+ip arp inspection validate src-mac
+ip arp inspection validate dst-mac
+ip arp inspection validate ip
+do show run | include validate
+ip arp inspection validate src-mac dst-mac ip
+do show run | include validate
+ip arp inspection validate src-mac dst-mac ip 
+
+
+
+!Activate DAI globally.
+ip dhcp snooping trust
+ip arp inspection trust
+
+!Activate DAI on the two VLANs.
+ip dhcp snooping vlan 10
+ip arp inspection vlan 10
+ip dhcp snooping vlan 999
+ip arp inspection vlan 999
+
+!Configure the port that links to the router as trusted.
+
+!Mitigate STP attacks by configuring BPDUguard and PortFast on
+! the active ports
+interface range fa0/1 - 5
+switchport mode access
+spanning-tree portfast
+spanning-tree bpduguard enable
+spanning-tree portfast bpduguard default
+
+
+
+
+interface g0/1
+switchport mode access
+interface range fa0/1 - 5
+switchport mode access
+spanning-tree portfast
+spanning-tree bpduguard enable
+spanning-tree portfast bpduguard default
+
+
+
+
+!Move all unused switch ports to VLAN 999.
+!Configure all unused switch ports as static access ports.
+!Deactivate all unused switch ports.
+interface range fa0/6 - 24
+switchport mode access
+switchport access vlan 999
+shutdown
+exit
+
+interface g0/2
+switchport mode access
+switchport access vlan 999
+shutdown
+exit
+exit
+
+
+
+copy run start
+
+
+
+
+
+
+
+
+interface fa0/1
+!switchport mode access
+!spanning-tree portfast
+!spanning-tree bpduguard enable
+!spanning-tree portfast bpduguard default
+
+
+!Verify that PortFast and BPDU Guard is enabled by default 
+!by viewing STP summary information.
+show spanning-tree summary
+!
+!
+end

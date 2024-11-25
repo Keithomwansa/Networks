@@ -1,0 +1,293 @@
+enable
+configure terminal 
+
+hostname Town-Hall 
+
+no ip domain lookup
+ 
+enable secret class 
+
+line console 0 
+password cisco 
+login 
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+transport input telnet
+
+banner motd "This is a secure system. Authorized Access only!"
+security passwords min-length 10 
+service password-encryption
+ 
+ 
+configure terminal
+interface vlan 1
+ip address 192.168.1.157 255.255.255.240
+ipv6 address 2001:db8:acad:b::1/64
+ipv6 address fe80::2 link-local 
+no shutdown
+exit
+ip default-gateway 192.168.1.126
+
+
+
+All ports are assigned to VLAN 1 by default.
+The native VLAN is VLAN 1 by default.
+The management VLAN is VLAN 1 by default.
+VLAN 1 cannot be renamed or deleted.
+
+Switch# show vlan brief 
+
+show vlan tagging
+S1# show interfaces fa0/18 switchport 
+
+create and assign vlans
+S3(config)# vlan 20
+S3(config-vlan)# name student
+S3(config-vlan)# vlan 150
+S3(config-vlan)# name VOICE
+S3(config-vlan)# exit
+S3(config)# interface fa0/18
+S3(config-if)# switchport mode access
+S3(config-if)# switchport access vlan 20
+S3(config-if)# mls qos trust cos
+S3(config-if)# switchport voice vlan 150
+S3(config-if)# end
+S3#
+
+verify vlan info
+show vlan summary
+show interfaces fa0/18 switchport
+show vlan brief
+R1# show ip route | begin Gateway
+S1# show interfaces trunk
+ show ip route | begin Gateway
+S1# show running-config | include interface fa0/5
+
+
+
+R1# show ip interface brief | include up
+
+
+
+change vlan port membership
+S1(config)# interface fa0/18
+S1(config-if)# no switchport access vlan
+S1(config-if)# end
+
+
+Vlan trunks
+
+S1(config)# interface fastEthernet 0/1
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport trunk native vlan 99
+S1(config-if)# switchport trunk allowed vlan 10,20,30,99
+S1(config-if)# end
+
+reset trunk
+S1(config)# interface fa0/1
+S1(config-if)# no switchport trunk allowed vlan
+S1(config-if)# no switchport trunk native vlan
+S1(config-if)# end
+
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport nonegotiate
+S1(config-if)# switchport mode dynamic auto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+intervlan routing
+S1(config)# vlan 10
+S1(config-vlan)# name LAN10
+S1(config-vlan)# exit
+S1(config)# vlan 20
+S1(config-vlan)# name LAN20
+S1(config-vlan)# exit
+S1(config)# vlan 99
+S1(config-vlan)# name Management
+S1(config-vlan)# exit
+S1(config)#
+
+
+
+S2(config)# vlan 10
+S2(config-vlan)# name LAN10
+S2(config-vlan)# exit
+S2(config)# vlan 20
+S2(config-vlan)# name LAN20
+S2(config-vlan)# exit
+S2(config)# vlan 99
+S2(config-vlan)# name Management
+S2(config-vlan)# exit
+S2(config)#
+S2(config)# interface vlan 99
+S2(config-if)# ip add 192.168.99.3 255.255.255.0
+S2(config-if)# no shut
+S2(config-if)# exit
+S2(config)# ip default-gateway 192.168.99.1
+S2(config)# interface fa0/18
+S2(config-if)# switchport mode access
+S2(config-if)# switchport access vlan 20
+S2(config-if)# no shut
+S2(config-if)# exit
+S2(config)# interface fa0/1
+S2(config-if)# switchport mode trunk
+S2(config-if)# no shut
+S2(config-if)# exit
+S2(config-if)# end
+
+
+
+
+
+create management interface
+
+S1(config)# interface vlan 99
+S1(config-if)# ip add 192.168.99.2 255.255.255.0
+S1(config-if)# no shut
+S1(config-if)# exit
+S1(config)# ip default-gateway 192.168.99.1
+S1(config)#
+
+
+
+
+subinterfaces on a router
+R1(config)# interface G0/0/1.10
+R1(config-subif)# description Default Gateway for VLAN 10
+R1(config-subif)# encapsulation dot1Q 10
+R1(config-subif)# ip add 192.168.10.1 255.255.255.0
+R1(config-subif)# exit
+R1(config)#
+R1(config)# interface G0/0/1.20
+R1(config-subif)# description Default Gateway for VLAN 20
+R1(config-subif)# encapsulation dot1Q 20
+R1(config-subif)# ip add 192.168.20.1 255.255.255.0
+R1(config-subif)# exit
+R1(config)#
+R1(config)# interface G0/0/1.99
+R1(config-subif)# description Default Gateway for VLAN 99
+R1(config-subif)# encapsulation dot1Q 99
+R1(config-subif)# ip add 192.168.99.1 255.255.255.0
+R1(config-subif)# exit
+R1(config)#
+R1(config)# interface G0/0/1
+R1(config-if)# description Trunk link to S1
+R1(config-if)# no shut
+R1(config-if)# end
+R1#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Create the VLANs.
+First, create the two VLANs as shown in the output.
+
+
+D1(config)# vlan 10
+D1(config-vlan)# name LAN10
+D1(config-vlan)# vlan 20
+D1(config-vlan)# name LAN20
+D1(config-vlan)# exit
+D1(config)#
+
+
+2. Create the SVI VLAN interfaces.
+Configure the SVI for VLANs 10 and 20. The IP addresses that are configured will serve as the default gateways to the hosts in the respective VLANs. Notice the informational messages showing the line protocol on both SVIs changed to up.
+
+
+D1(config)# interface vlan 10
+D1(config-if)# description Default Gateway SVI for 192.168.10.0/24
+D1(config-if)# ip add 192.168.10.1 255.255.255.0
+D1(config-if)# no shut
+D1(config-if)# exit
+D1(config)#
+D1(config)# int vlan 20
+D1(config-if)# description Default Gateway SVI for 192.168.20.0/24
+D1(config-if)# ip add 192.168.20.1 255.255.255.0
+D1(config-if)# no shut
+D1(config-if)# exit
+D1(config)#
+*Sep 17 13:52:16.053: %LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan10, changed state to up
+*Sep 17 13:52:16.160: %LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan20, changed state to up
+
+
+
+
+3. Configure access ports.
+Next, configure the access ports connecting to the hosts and assign them to their respective VLANs.
+
+
+D1(config)# interface GigabitEthernet1/0/6
+D1(config-if)# description Access port to PC1
+D1(config-if)# switchport mode access
+D1(config-if)# switchport access vlan 10
+D1(config-if)# exit
+D1(config)#
+D1(config)# interface GigabitEthernet1/0/18
+D1(config-if)# description Access port to PC2
+D1(config-if)# switchport mode access
+D1(config-if)# switchport access vlan 20
+D1(config-if)# exit
+
+4. Enable IP routing.
+Finally, enable IPv4 routing with the ip routing global configuration command to allow traffic to be exchanged between VLANs 10 and 20. This command must be configured to enable inter-VAN routing on a Layer 3 switch for IPv4.
+
+
+D1(config)# ip routing
+
+
+show spanning-tree vlan 1 
+
+
+Ehetrchannel
+
+Configuring EtherChannel with LACP requires the following three steps:
+Step 1. Specify the interfaces that compose the EtherChannel group using the interface range interface global configuration mode command. The range keyword allows you to select several interfaces and configure them all together.
+Step 2. Create the port channel interface with the channel-group identifier mode active command in interface range configuration mode. The identifier specifies a channel group number. The mode active keywords identify this as an LACP EtherChannel configuration.
+Step 3. To change Layer 2 settings on the port channel interface, enter port channel interface configuration mode using the interface port-channel command, followed by the interface identifier. In the example, S1 is configured with an LACP EtherChannel. The port channel is configured as a trunk interface with the allowed VLANs specified.
+
+S1(config)# interface range FastEthernet 0/1 - 2
+S1(config-if-range)# channel-group 1 mode active
+Creating a port-channel interface Port-channel 1
+S1(config-if-range)# exit
+S1(config)# interface port-channel 1
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport trunk allowed vlan 1,2,
+
+S1# show interfaces port-channel 1
+S1# show etherchannel summary
+S1# show interfaces f0/1 etherchannel
+
+

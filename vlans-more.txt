@@ -1,0 +1,569 @@
+RTR-1
+
+
+en
+conf t
+
+ip route 10.0.10.0 255.255.255.0 GigabitEthernet0/0/0
+
+ip route 10.0.20.0 255.255.255.0 GigabitEthernet0/0/0
+
+ip route 10.0.30.0 255.255.255.0 GigabitEthernet0/0/0
+
+
+
+no ip domain lookup
+
+ 
+enable secret password
+
+line console 0 
+password cisco 
+login 
+logging synchronous
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+transport input ssh telnet
+exit
+
+banner motd #
+****************************
+This is a secure system. Authorized Access only!
+*******************************
+#
+
+hostname RTR-1 
+
+service password-encryption
+ 
+ 
+
+ 
+interface g0/0/0
+description Link to MSW-1 via g0/0/0
+ip address 10.0.0.1 255.255.255.0 
+exit
+
+interface s0/1/0 
+description Link to Internet server via s0/1/0
+ip address 209.165.201.2 255.255.255.0 
+exit
+
+
+interface G0/0/1.40
+description Default Gateway for VLAN 40
+encapsulation dot1Q 40
+ip add 10.0.40.1 255.255.255.0
+exit
+
+
+interface G0/0/1.50
+description Default Gateway for VLAN 50
+encapsulation dot1Q 50
+ip add 10.0.50.1 255.255.255.0
+exit
+
+
+interface G0/0/1.60
+description Default Gateway for VLAN 60
+encapsulation dot1Q 60
+ip add 10.0.60.1 255.255.255.0
+exit
+
+
+interface G0/0/1.99
+description Default Gateway for VLAN 99
+encapsulation dot1Q 99
+ip add 10.0.99.17 255.255.255.0
+exit
+
+interface G0/0/1
+description Trunk link to default-gateway
+switchport trunk native vlan 99
+no shut
+end
+
+exit
+copy run startup
+
+
+
+
+SW-3
+
+
+
+en
+config ter
+
+hostname SW-3 
+no ip domain-lookup
+ 
+enable secret class 
+
+line console 0 
+password cisco 
+login 
+logging synchronous
+exit 
+
+line vty 0 4 
+password cisco 
+transport input ssh
+login 
+exit
+
+
+service password-encryption 
+
+banner motd "This is a secure system. Authorized Access only!"
+
+
+ip domain name acad.pt
+crypto key generate rsa general-keys modulus 1024
+
+
+username admin secret C1sco123!
+line vty 0 4
+login local
+transport input ssh
+exi
+
+
+ 
+vlan 40
+name B3
+exit
+vlan 50
+name B4
+exit
+vlan 60
+name B5
+exit
+vlan 99
+name NetAdmin
+exit
+
+interface vlan 40
+ip address 10.0.40.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 50
+ip address 10.0.50.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 60
+ip address 10.0.60.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 99
+ip address 10.0.60.16 255.255.255.240
+no shutdown
+exit
+
+interface vlan 99
+ip address 10.0.99.18 255.255.255.0
+no shutdown
+exit
+
+
+
+
+interface range fa0/1-5
+switchport mode access
+switchport access vlan 40
+no shut
+exit
+
+interface range fa0/6-10
+switchport mode access
+switchport access vlan 50
+no shut
+exit
+
+interface range fa0/11-15
+switchport mode access
+switchport access vlan 60
+no shut
+exit
+
+interface range fa0/24
+switchport mode access
+switchport access vlan 99
+no shut
+exit
+
+interface G0/1
+description Trunk link to RTR-1
+switchport mode trunk
+switchport nonegotiate
+no shut
+end
+
+exit
+copy run start
+
+
+
+
+
+
+MSW-1
+
+en
+config ter
+
+hostname MSW-1 
+no ip domain-lookup
+ 
+enable secret class 
+
+line console 0 
+password cisco 
+login 
+logging synchronous
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+exit
+
+vlan 10
+name B1F1
+exit
+vlan 20
+name B1F2
+exit
+vlan 30
+name B1F4
+exit
+
+
+interface vlan 10
+ip address 10.0.10.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 20
+ip address 10.0.20.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 30
+ip address 10.0.30.0 255.255.255.0
+no shutdown
+exit
+
+
+int g 1/1/1
+switchport mode trunk 
+switchport nonegotiate 
+ip addr 10.0.0.2 255.255.255.0
+exit
+
+interface range g1/0/1 - 2
+channel-group 1 mode active
+exit
+
+interface range g1/0/3 - 4
+channel-group 2 mode active
+exit
+
+interface port-channel 1
+switchport mode trunk
+switchport nonegotiate
+no shut
+exit
+
+interface port-channel 2
+switchport mode trunk
+switchport nonegotiate
+no shut
+exit
+
+service password-encryption 
+
+banner motd "This is a secure system. Authorized Access only!"
+
+exit
+copy run start
+
+
+
+
+SW-1
+
+en
+config ter
+
+hostname SW-1 
+no ip domain-lookup
+ 
+enable secret class 
+
+line console 0 
+password cisco 
+login 
+logging synchronous
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+exit
+
+vlan 10
+name B1F1
+exit
+vlan 20
+name B1F2
+exit
+vlan 30
+name B1F4
+exit
+
+interface vlan 10
+ip address 10.0.10.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 20
+ip address 10.0.20.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 30
+ip address 10.0.30.0 255.255.255.0
+no shutdown
+exit
+
+interface range f0/7-10
+switchport mode access
+switchport access vlan 10
+exit
+
+interface range f0/11-15
+switchport mode access
+switchport access vlan 20
+exit
+
+
+interface range f0/16-24
+switchport mode access
+switchport access vlan 30
+exit
+
+
+
+
+
+interface range g0/1 - 2
+channel-group 1 mode active
+exit
+
+interface range f0/5 - 6
+channel-group 3 mode active
+exit
+
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 99
+switchport nonegotiate
+no shut
+exit
+
+interface port-channel 3
+switchport mode trunk
+switchport nonegotiate
+no shut
+exit
+
+service password-encryption 
+
+banner motd "This is a secure system. Authorized Access only!"
+
+
+exit
+copy run start
+
+
+interface g 0/1
+switchport mode trunk
+switchport nonegotiate
+end
+
+
+
+
+
+SW-2
+
+en
+config ter
+
+hostname SW-2
+no ip domain-lookup
+ 
+enable secret class 
+
+service password-encryption 
+
+banner motd "This is a secure system. Authorized Access only!"
+
+line console 0 
+password cisco 
+login 
+logging synchronous
+exit 
+
+line vty 0 4 
+password cisco 
+login 
+exit
+
+
+vlan 10
+name B1F1
+exit
+vlan 20
+name B1F2
+exit
+vlan 30
+name B1F4
+exit
+
+interface vlan 10
+ip address 10.0.10.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 20
+ip address 10.0.20.0 255.255.255.0
+no shutdown
+exit
+
+interface vlan 30
+ip address 10.0.30.0 255.255.255.0
+no shutdown
+exit
+
+
+
+interface range f0/7-10
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+
+interface range f0/11-15
+switchport mode access
+switchport access vlan 20
+no shut
+exit
+
+
+interface range f0/16-24
+switchport mode access
+switchport access vlan 30
+no shut
+exit
+
+
+interface range g0/1 - 2
+channel-group 2 mode active
+exit
+
+interface range f0/5 - 6
+channel-group 3 mode active
+exit
+
+interface port-channel 2
+switchport mode trunk
+switchport nonegotiate
+exit
+
+interface port-channel 3
+switchport mode trunk
+switchport nonegotiate
+exit
+
+
+exit
+copy run start
+
+
+
+
+S1# show interfaces fa0/18 switchport  
+
+show vlan brief
+
+show vlan summary
+
+
+ip domain name keltech.com
+crypto key generate rsa general-keys modulus 1024
+
+
+username netadmin secret Cisco_CCNA7
+line vty 0 4
+login local
+transport input ssh
+exit
+
+interface g 0/1
+switchport mode trunk
+switchport trunk native vlan 99
+switchport nonegotiate
+end
+
+
+trunk allowed vlan 10,20,30,99
+
+
+S3(config)# vlan 20
+S3(config-vlan)# name student
+S3(config-vlan)# vlan 150
+S3(config-vlan)# name VOICE
+S3(config-vlan)# exit
+S3(config)# interface fa0/18
+S3(config-if)# switchport mode access
+S3(config-if)# switchport access vlan 20
+S3(config-if)# mls qos trust cos
+S3(config-if)# switchport voice vlan 150
+S3(config-if)# end
+S3
+
+
+S1(config)# interface fa0/1
+S1(config-if)# no switchport trunk allowed vlan
+S1(config-if)# no switchport trunk native vlan
+S1(config-if)# end
+
+configure DTP
+
+S1(config-if)# switchport mode trunk
+S1(config-if)# switchport nonegotiate
+
+To re-enable dynamic trunking protocol use:
+
+S1(config-if)# switchport mode dynamic auto
+
+
+
+R1# show ip route | begin Gateway
+
+
+
+
+interface G0/0/1
+description Trunk link to MSW-1
+no shut
+end

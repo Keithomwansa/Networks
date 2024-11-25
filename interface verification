@@ -1,0 +1,99 @@
+Display interface status and configuration.
+S1# show interfaces [interface-id]
+
+Display current startup configuration.
+S1# show startup-config
+
+Display current operating config.
+S1# show running-config
+
+Display information about flash file system.
+S1# show flash
+
+Display system hardware and software status.
+S1# show version
+
+Display history of command entered.
+S1# show history
+
+Display IP information about an interface.
+S1# show ip interface [interface-id]
+
+Display the MAC address table.
+S1# show mac-address-table OR
+S1# show mac address-table
+
+
+Display interface status and configuration.	
+S1# show interfaces [interface-id]
+Display current startup configuration.	
+S1# show startup-config
+Display current running configuration.	
+S1# show running-config
+Display information about flash file system.	
+S1# show flash
+Display system hardware and software status.	
+S1# show version
+Display history of command entered.	
+S1# show history
+Display IP information about an interface.	
+S1# show ip interface [interface-id]
+OR
+S1# show ipv6 interface [interface-id]
+Display the MAC address table.	
+S1# show mac-address-table
+OR
+S1# show mac address-table
+
+
+S1# show interfaces fastEthernet 0/18 
+
+
+
+R1# show running-config interface gigabitethernet 0/0/0
+
+
+show ip route
+show ipv6 route
+R1# ping 2001:db8:acad:1::10
+
+filter cmd
+R1# ping 2001:db8:acad:1::10
+
+include
+R1# show ip interface brief | include up
+
+exclude
+R1# show ip interface brief | exclude unassigned
+
+begin
+R1# show ip route | begin Gateway
+
+R1#show running-config | section line con
+line con 0
+ password 7 05080F1C2243
+ transport input none
+Enter the command to filter for 'down' interfaces in the brief listing.
+
+R1#show ip interface brief | include down
+Serial0/1/1   unassigned   NO  unset  down  down
+Enter the command to exclude 'up' interfaces in the brief listing.
+
+R1#show ip interface brief | exclude up
+Interface            IP-Address      OK? Method Status                Protocol
+Serial0/1/1            unassigned      NO  unset  down                  down
+Enter the command to filter the show running-config output to begin at the word 'line'.
+
+R1#show running-config | begin line
+
+
+command historyR1# terminal history size 200
+R1# show history
+  show ip int brief
+  show interface g0/0/0
+  show ip route
+  show running-config
+  show history
+  terminal history size 200
+
+

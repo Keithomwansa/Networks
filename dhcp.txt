@@ -1,0 +1,233 @@
+make R1 a DHCPv4 server
+ for the 192.168.10.0/24 LAN.
+
+ip dhcp excluded-address 192.168.10.1 192.168.10.9
+ip dhcp excluded-address 192.168.10.254
+ip dhcp pool LAN-POOL-1
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+dns-server 192.168.11.5
+domain-name example.com
+end
+
+
+interface g0/0/0
+ip helper-address 192.168.11.6
+end
+
+
+
+interface G0/0/1
+ip address dhcp
+no shutdown
+
+
+show ip interface g0/0/1
+GigabitEthernet0/0/1 is up, line protocol is up
+  Internet address is 209.165.201.12/27
+  Broadcast address is 255.255.255.255
+  Address determined by DHCP
+
+
+
+show running-config | section dhcp
+
+show ip dhcp binding
+show ip dhcp server statistics
+
+
+
+
+int g0/0/1
+ipv6 nd managed-config-flag
+ipv6 nd prefix default no-autoconfig
+end
+
+
+stateful dhcpv6
+ipv6 nd other-config-flag
+
+
+
+
+C:\Users\Student> ipconfig /all
+
+
+
+
+
+There are five steps to configure and
+verify a router as a stateless DHCPv6 server:
+
+Step 1. Enable IPv6 routing.
+Step 2. Define a DHCPv6 pool name.
+Step 3. Configure the DHCPv6 pool.
+Step 4. Bind the DHCPv6 pool to an interface.
+Step 5. Verify that the hosts have received IPv6 addressing information.
+
+
+ip helper-address 
+This will cause R1 to relay DHCPv4 broadcasts to the DHCPv4 server.
+ As shown in the example, the interface on R1 receiving the broadcast
+ from PC1 is configured to relay DHCPv4 address to the DHCPv4 server a
+ t 192.168.11.6.
+ 
+ The following is an example of how to configure DHCP snooping on S1.
+ Notice how DHCP snooping is first enabled. Then the upstream interface
+ to the DHCP server is explicitly trusted. Next, the range of FastEtherne
+ t ports from F0/5 to F0/24 are untrusted by default, so a rate limit is
+ set to six packets per second. Finally, DHCP snooping is enabled on VLANS 5,
+ 10, 50, 51, and 52.
+
+S1(config)# ip dhcp snooping
+S1(config)# interface f0/1
+S1(config-if)# ip dhcp snooping trust
+S1(config-if)# exit
+S1(config)# interface range f0/5 - 24
+S1(config-if-range)# ip dhcp snooping limit rate 6
+S1(config-if-range)# exit
+S1(config)# ip dhcp snooping vlan 5,10,50-52
+S1(config)# end
+S1#
+
+
+R1(config)# interface g0/0/0
+R1(config-if)# ip helper-address 192.168.11.6
+R1(config-if)# end
+R1#
+
+
+
+You are currently logged into S1. 
+Enable DHCP snooping globally for the switch.
+
+S1(config)#ip dhcp snooping
+
+
+Enter interface configuration mode for
+ g0/1 - 2, trust the interfaces for both DHCP snooping and DAI
+ and then return to global configuration mode.
+
+S1(config)#interface range g0/1 - 2
+S1(config-if-range)#ip dhcp snooping trust
+S1(config-if-range)#ip arp inspection trust
+S1(config-if-range)#exit
+
+Enable DHCP snooping and DAI for VLANs 10,20,30-49.
+S1(config)#ip dhcp snooping vlan 10,20,30-49
+S1(config)#ip arp inspection vlan 10,20,30-49
+S1(config)#
+
+
+SOHO(config)# interface G0/0/1
+SOHO(config-if)# ip address dhcp
+SOHO(config-if)# no shutdown
+SOHO# show ip interface g0/0/1
+
+
+Step 1. Enable IPv6 routing.
+The ipv6 unicast-routing command is required
+to enable IPv6 routing.
+
+
+ipv6 unicast-routing
+
+
+
+Step 2. Define a DHCPv6 pool name.
+Create the DHCPv6 pool using the
+ipv6 dhcp pool POOL-NAME global config command.
+
+
+ipv6 dhcp pool IPV6-STATEFUL
+
+
+Step 3.Configure the DHCPv6 pool.
+R1 will be configured to provide IPv6 addressing,
+ DNS server address, and domain name, 
+as shown in the command output. With stateful DHCPv6,
+ all addressing and other configuration parameters 
+ must be assigned by the DHCPv6 server. 
+ The address prefix command is used to indicate the
+ pool of addresses to be allocated by the server. 
+ Other information provided by the stateful DHCPv6 
+ server typically includes DNS server address 
+ the domain name, as shown in the output.
+Note: This example is setting the DNS server
+ to Google's public DNS server.
+
+
+R1(config-dhcpv6)# address prefix 2001:db8:acad:1::/64
+R1(config-dhcpv6)# dns-server 2001:4860:4860::8888
+R1(config-dhcpv6)# domain-name example.com
+R1(config-dhcpv6)#
+
+
+
+Step 4. Bind the DHCPv6 pool to an interface.
+The example shows the full configuration of the
+ GigabitEthernet 0/0/1 interface on R1.
+The DHCPv6 pool has to be bound to the 
+interface using the ipv6 dhcp server POOL-NAME
+ interface config command.
+• The M flag is manually changed from 0 to 1 
+using the interface command 
+ipv6 nd managed-config-flag.
+• The A flag is manually changed from 1 to 0
+ using the interface command 
+ ipv6 nd prefix default no-autoconfig.
+ The A flag can be left at 1, but some 
+ client operating systems such as Windows 
+ will create a GUA using SLAAC and get a GUA
+ from the stateful DHCPv6 server. Setting the 
+ A flag to 0 tells the client not to use SLAAC 
+ to create a GUA.
+• The ipv6 dhcp server command binds the 
+DHCPv6 pool to the interface. 
+R1 will now respond with the information
+contained in the pool when it receives stateful
+ DHCPv6 requests on this interface.
+
+Note: You can use the
+ no ipv6 nd managed-config-flag command 
+to set the M flag back to its default of 0.
+ The no ipv6 nd prefix default no-autoconfig 
+ command sets the A flag back to its default of 1.
+
+
+R1(config)# interface GigabitEthernet0/0/1
+R1(config-if)# description Link to LAN
+R1(config-if)# ipv6 address fe80::1 link-local
+R1(config-if)# ipv6 address 2001:db8:acad:1::1/64
+R1(config-if)# ipv6 nd managed-config-flag
+R1(config-if)# ipv6 nd prefix default no-autoconfig
+R1(config-if)# ipv6 dhcp server IPV6-STATEFUL
+R1(config-if)# no shut
+R1(config-if)# end
+R1#
+
+
+
+stateful dhcp
+The DHCPv6 client router needs to 
+have ipv6 unicast-routing enabled.
+ipv6 unicast-routing
+ipv6 address dhcp
+end
+
+
+
+show ipv6 interface brief
+show ipv6 dhcp interface g0/0/1
+show ipv6 dhcp pool
+show ipv6 dhcp binding
+
+
+
+dhcpv6 relay agent
+R1(config)# interface gigabitethernet 0/0/1
+R1(config-if)# ipv6 dhcp relay destination 2001:db8:acad:1::2 G0/0/0
+R1(config-if)# exit
+R1(config)#
+
+

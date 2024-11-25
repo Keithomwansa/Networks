@@ -1,0 +1,87 @@
+
+
+Enable port security
+
+S1(config)# interface f0/1
+S1(config-if)# switchport port-security
+Command rejected: FastEthernet0/1 is a dynamic port.
+S1(config-if)# switchport mode access
+S1(config-if)# switchport port-security
+S1(config-if)# end
+S1
+
+
+Use the interface name fa0/5 to enter interface configuration mode.
+Enable the port for access mode.
+Enable port security.
+Set the maximum number of MAC address to 3.
+Statically configure the MAC address aaaa.bbbb.1234.
+Configure the port to dynamically learn additional MAC addresses and dynamically add them to the running configuration.
+Return to privileged EXEC mode.
+
+
+interface fa0/5
+switchport mode access
+switchport port-security
+switchport port-security maximum 3
+switchport port-security mac-address aaaa.bbbb.1234
+switchport port-security mac-address sticky
+end
+
+
+Enter the command to verify port security for all interfaces.
+
+show port-security
+
+show port-security interface fa0/5
+Port Security              : Enabled
+Port Status                : Secure-up
+Violation Mode             : Shutdown
+Aging Time                 : 0 mins
+Aging Type                 : Absolute
+SecureStatic Address Aging : Disabled
+Maximum MAC Addresses      : 3
+Total MAC Addresses        : 2
+Configured MAC Addresses   : 1
+Sticky MAC Addresses       : 1
+Last Source Address:Vlan   : 0090.2135.6B8C:1
+Security Violation Count   : 0
+Enter the command that will display all of the addresses to verify that the manually configured and dynamically learned MAC addresses are in the running configuration.
+
+show port-security address
+
+
+
+
+Access the command line for S1 and enable port
+security on Fast Ethernet ports 0/1 and 0/2.
+Open Configuration Window
+
+interface range f0/1 – 2
+switchport port-security
+
+Set the maximum so that only one device can
+ access the Fast Ethernet ports 0/1 and 0/2.
+
+switchport port-security maximum 1
+
+Secure the ports so that the MAC address of a 
+device is dynamically learned and added to the running
+configuration.
+
+switchport port-security mac-address sticky
+
+Set the violation mode so that the Fast Ethernet ports
+ 0/1 and 0/2 are not disabled when a violation
+occurs, but a notification of the security violation is generated and packets from the unknown source are
+dropped.
+
+switchport port-security violation restrict
+
+
+e. Disable all the remaining unused ports. 
+Use the range keyword to apply this configuration to all the ports
+simultaneously.
+
+interface range f0/3 - 24, g0/1 - 2
+shutdown
